@@ -1,0 +1,70 @@
+services:
+  # ── KMS container ──
+  # Auto-initializes wallet + agent token on first boot.
+  # Mnemonic shown in logs on first run -- back it up.
+  ows-vault:
+    build:
+      context: .
+      dockerfile: docker/kms.Dockerfile
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 30s
+    volumes:
+      - ows-vault-data:/home/ows/.ows
+      - ows-sock:/var/run/ows
+    tmpfs:
+      - /tmp:size=64M
+    environment:
+      - OWS_VAULT_PATH=/home/ows/.ows
+      - OWS_WALLET_NAME=pi-treasury
+      - OWS_PASSPHRASE_FILE=/home/ows/.ows/passphrase
+      - KMS_SOCKET_PATH=/var/run/ows/ows.sock
+    networks:
+      - kms-internal
+    healthcheck:
+      test: ["CMD", "node", "-e", "const http=require('http');const req=http.request({socketPath:'/var/run/ows/ows.sock',path:'/health'},res=>{process.exit(res.statusCode===200?0:1)});req.on('error',()=>process.exit(1));req.end()"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ── Pi Agent container ──
+  pi-agent:
+    build:
+      context: .
+      dockerfile: docker/agent.Dockerfile
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - ows-sock:/var/run/ows:ro
+      - agent-data:/data    # Persists tokens + Pi sessions
+    tmpfs:
+      - /work:size=512M
+      - /tmp:size=256M
+    environment:
+      - KMS_SOCKET_PATH=/var/run/ows/ows.sock
+      - OWS_TOKEN_FILE=/data/token
+      - OWS_APPROVED_TOKENS_FILE=/data/approved-tokens.json
+      - HOME=/data
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    networks:
+      - kms-internal
+      - agent-internet    # Agent needs internet for LLM API
+    depends_on:
+      ows-vault:
+        condition: service_healthy
+
+volumes:
+  ows-vault-data:    # Encrypted wallet, passphrase, keys, audit log
+  ows-sock:          # Unix socket (tmpfs)
+  agent-data:        # Agent tokens + Pi sessions (persists across restarts)
+networks:
+  kms-internal:
+    internal: true     # KMS: no external/internet access
+  agent-internet: {}   # Agent: internet access for LLM APIs

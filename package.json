@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@mariozechner/pi-coding-agent": "^0.62.0",
+    "ethers": "^6.16.0"
+  }
+}
