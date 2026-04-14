@@ -6,11 +6,13 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm install --production
 
-# Copy wallet skill where Pi auto-discovers it
+# Copy skills where Pi auto-discovers them
 COPY skills/wallet/ ./.agents/skills/wallet/
+COPY skills/ows/ ./.agents/skills/ows/
 
-# Copy bootstrap script
+# Copy scripts
 COPY scripts/bootstrap-token.js ./scripts/bootstrap-token.js
+COPY scripts/sign.sh ./scripts/sign.sh
 
 # Create working directories owned by node user (uid 1000)
 RUN mkdir -p /work /tmp/agent /data/.pi/agent/sessions && \

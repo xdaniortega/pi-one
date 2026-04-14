@@ -1,21 +1,16 @@
 ---
 name: wallet
-description: Sign messages and transactions on any blockchain (EVM, Solana, Bitcoin, Cosmos, Tron, TON, Sui, Spark, Filecoin), check wallet addresses, and manage wallet capabilities via the KMS. Use when the user asks about signing, wallets, blockchain operations, or crypto transactions.
+description: Check wallet addresses and manage wallet capabilities via the KMS. For signing, see the ows skill.
 ---
 
 # Wallet
 
 Secure wallet operations via an isolated KMS container. All output is JSON.
 
-## Sign a message
+## Signing
 
-```bash
-node {baseDir}/scripts/wallet.js sign --chain evm --message "hello world"
-```
-
-Supported chains: `evm`, `solana`, `bitcoin`, `cosmos`, `tron`, `ton`, `sui`, `spark`, `filecoin`.
-
-If you receive `POLICY_DENIED`, use "Request a new capability" below.
+Signing is routed through the OWS CLI. See the `ows` skill for all signing commands.
+The agent calls `scripts/sign.sh` via bash tool — never through this skill.
 
 ## Get wallet address
 
