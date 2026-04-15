@@ -35,6 +35,8 @@ services:
     build:
       context: .
       dockerfile: docker/agent.Dockerfile
+    stdin_open: true
+    tty: true
     cap_drop:
       - ALL
     security_opt:

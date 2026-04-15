@@ -106,20 +106,22 @@ The agent picks up the token and starts. No token is ever auto-provisioned -- yo
 
 ### 4. Use the wallet
 
-The agent has a wallet skill that gives it these capabilities:
+Open an interactive console with the agent:
 
 ```bash
-# Sign a message
-node skills/wallet/scripts/wallet.js sign --chain evm --message "hello world"
-
-# Get wallet address
-node skills/wallet/scripts/wallet.js address --chain evm
-
-# Check capabilities
-node skills/wallet/scripts/wallet.js capabilities
+docker-compose up -d
+docker attach pi-one-pi-agent-1
 ```
 
-When talking to the agent, it will use these commands automatically based on the [wallet skill](skills/wallet/SKILL.md).
+You can now chat with the agent. For example:
+
+```
+> What's my EVM wallet address?
+> Sign this message on EVM: "hello world"
+> What chains can I sign on?
+```
+
+The agent uses the [wallet](skills/wallet/SKILL.md) and [ows](skills/ows/SKILL.md) skills automatically to translate your request into the right CLI calls.
 
 Supported chains: `evm`, `solana`, `bitcoin`, `cosmos`, `tron`, `ton`, `sui`, `spark`, `filecoin`.
 

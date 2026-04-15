@@ -80,9 +80,13 @@ function needToken() { const t = loadToken(); if (!t) die("No wallet token avail
 
 // ── Commands ──
 
-async function cmdSign() {
-  // agent calls scripts/sign.sh via bash tool
-  die("Signing removed from wallet.js — use scripts/sign.sh or ows CLI (see skills/ows/SKILL.md)");
+async function cmdSign(args) {
+  if (!args.chain) die("--chain required (evm, solana, bitcoin, cosmos, tron, ton, sui, spark, filecoin)");
+  if (!args.message) die("--message required");
+  const token = needToken();
+  const res = await kms("POST", "/sign-message", { chain: args.chain, message: args.message }, token);
+  if (res.status !== 200) die(res.data.error || `KMS returned ${res.status}`, res.data.code);
+  out(res.data);
 }
 
 async function cmdAddress(args) {
